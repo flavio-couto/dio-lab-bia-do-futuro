@@ -6,7 +6,7 @@ import streamlit as st
 # ============= CONFIGURAÇÃO =============
 
 OLLAMA_URL = "http://localhost:11434/api/generate"
-MODELO = "gpt-oss"
+MODELO = "gpt-oss:20b"
 
 # ============= CARREGAR DADOS =============
 
@@ -50,7 +50,7 @@ REGRAS:
 
 # ============= CHAMAR OLLAMA =============
 
-def perguntar():
+def perguntar(msg):
     prompt = f"""
     {SYSTEM_PROMPT}
 
@@ -60,8 +60,14 @@ def perguntar():
     Pergunta: {msg}"""
 
     r = requests.post(OLLAMA_URL, json={"model": MODELO, "prompt": prompt, "stream": False})
-    return r.json()['response']
 
+    dados = r.json()
+
+    print("STATUS:", r.status_code)
+    print("RESPOSTA:", dados)
+
+    return dados.get("response", str(dados))
+    
 # ============= INTERFACE =============
 
 st.title("FinancIA, seu educador financeiro mais legal")
@@ -69,4 +75,5 @@ st.title("FinancIA, seu educador financeiro mais legal")
 if pergunta := st.chat_input("Digite aqui a sua dúvida sobre finanças: "):
     st.chat_message("user").write(pergunta)
     with st.spinner("..."):
-        st.chat_message("assistant".write(perguntar(pergunta)))
+         with st.chat_message("assistant"):
+            st.write(perguntar(pergunta))
